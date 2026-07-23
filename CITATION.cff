@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+title: "Definition of the projected coordinate reference system WGS 84 / Mozambique LAEA"
+message: "If you use this CRS definition or the reproduction package, please cite it as below."
+type: software
+authors:
+  - family-names: "Gonçalves"
+    given-names: "Pedro"
+    affiliation: "LNEG, I.P. (Laboratório Nacional de Energia e Geologia), Mineral Resources and Geophysics Unit"
+    orcid: "https://orcid.org/0000-0002-6556-6086"
+abstract: >-
+  Defining note and reproducibility package for a national equal-area projected
+  coordinate reference system for Mozambique, based on the Lambert Azimuthal
+  Equal Area projection (EPSG method 9820) centred on the country's territorial
+  midpoint. Submitted as a change request to the IOGP EPSG Geodetic Parameter
+  Dataset.
+keywords:
+  - coordinate reference system
+  - Lambert Azimuthal Equal Area
+  - Mozambique
+  - EPSG
+  - equal-area projection
+  - reproducible research
+license: CC-BY-4.0
+version: "1.0.0"
+date-released: "2026-07-23"
+doi: "10.5281/zenodo.21512485"
+repository-code: "https://github.com/LNEG/mozambique-laea"

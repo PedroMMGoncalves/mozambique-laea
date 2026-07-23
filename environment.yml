@@ -1,0 +1,15 @@
+name: MZ_LAEA
+channels:
+  - conda-forge
+dependencies:
+  - python>=3.11
+  - pyproj>=3.7          # requires PROJ >= 9.5
+  - numpy>=1.24
+  - shapely>=2.0
+  - matplotlib>=3.8
+  # rendering the document only:
+  - quarto
+  - jupyter
+  - nbclient
+  - nbformat
+  - ipykernel

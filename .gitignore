@@ -1,0 +1,26 @@
+# Quarto
+/.quarto/
+_freeze/
+report_files/
+
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Generated output, with deliberate exceptions below
+output/*
+!output/results.csv
+!output/fig1_omega_field.png
+!output/fig2_omega_cdf.png
+!output/fig3_country_fill.png
+!output/fig4_peer_benchmark.png
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / tooling local state
+.claude/
+
+**/*.quarto_ipynb

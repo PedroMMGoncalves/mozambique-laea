@@ -1,0 +1,29 @@
+N tip,NE off,S tip,SE off,W edge,areal_scale,crs,distance_km,easting_m,latitude,location,longitude,max,median,meridional_scale,northing_m,omega_pyproj,omega_svd,p95,parallel_scale,point,projection,roundtrip_mas,section
+0.371,0.53,0.343,0.592,0.126,,,,,,,,0.592,,,,,,,,,**LAEA 18.5°S / 35.5°E (this CRS)**,,Table 1
+0.57,0.673,0.73,1.008,0.451,,,,,,,,1.008,,,,,,,,,"Albers Equal Area, parallels 13°/24° S",,Table 1
+6.837,6.953,3.379,4.197,4.296,,,,,,,,6.953,,,,,,,,,"Africa Albers (ESRI:102022, 20°N/23°S)",,Table 1
+4.129,4.266,6.968,7.828,1.254,,,,,,,,7.828,,,,,,,,,"Lambert Cylindrical EA, lat_ts 18.5°S",,Table 1
+0.412,0.962,0.095,0.776,0.449,,,,,,,,0.962,,,,,,,,,"Transverse Cylindrical EA, lon_0 35.5°E",,Table 1
+,,,,,,,,,,,,0.371,0.09,,,,,0.243,,,**LAEA 18.5°S / 35.5°E (this CRS)**,,Table 2
+,,,,,,,,,,,,0.709,0.314,,,,,0.523,,,"Albers Equal Area, parallels 13°/24° S",,Table 2
+,,,,,,,,,,,,6.828,4.402,,,,,6.355,,,"Africa Albers (ESRI:102022, 20°N/23°S)",,Table 2
+,,,,,,"US National Atlas Equal Area, EPSG:9311 (USGS)",,,,,,19.42,3.12,,,,,,,,,,Table 3
+,,,,,,"ETRS89-extended / LAEA Europe, EPSG:3035 (EEA)",,,,,,8.59,2.04,,,,,,,,,,Table 3
+,,,,,,"GDA94 / Australian Albers, EPSG:3577 (Geoscience Australia)",,,,,,4.14,1.17,,,,,,,,,,Table 3
+,,,,,,"NAD83 / Conus Albers, EPSG:5070 (USGS)",,,,,,1.61,0.8,,,,,,,,,,Table 3
+,,,,,,**WGS 84 / Mozambique LAEA (this proposal)**,,,,,,0.59,0.16,,,,,,,,,,Table 3
+,,,,,,,,-292694.12,25°58′00.000″ S,Maputo,32°35′00.000″ E,,,,-828776.43,,,,,,,0.0481,Section 8
+,,,,,,,,-205003.13,16°10′00.000″ S,Tete,33°35′00.000″ E,,,,257174.15,,,,,,,0.0484,Section 8
+,,,,,,,,542883.76,12°58′00.000″ S,Pemba,40°30′00.000″ E,,,,605147.13,,,,,,,0.0432,Section 8
+,,,,,1.0,,,,-10,,,,,1.0628,,6.98,6.98,,0.9409,,,,Section 3 crosscheck
+,,,,,1.0,,,,-23,,,,,1.0,,0.0,0.0,,1.0,,,,Section 3 crosscheck
+,,,,,1.0,,,,,,,,,,,0.3707,0.3707,,,N tip,,,CRS crosscheck
+,,,,,1.0,,,,,,,,,,,0.3426,0.3426,,,S tip,,,CRS crosscheck
+,,,,,1.0,,,,,,,,,,,0.1261,0.1261,,,W edge,,,CRS crosscheck
+,,,,,1.0,,,,,,,,,,,0.5301,0.5301,,,NE off,,,CRS crosscheck
+,,,,,1.0,,,,,,,,,,,0.5925,0.5925,,,SE off,,,CRS crosscheck
+,,,,,,,1036,,,,,,,,,,,,,N tip,,,Section 2.2
+,,,,,,,965,,,,,,,,,,,,,S tip,,,Section 2.2
+,,,,,,,604,,,,,,,,,,,,,W edge,,,Section 2.2
+,,,,,,,1235,,,,,,,,,,,,,NE off,,,Section 2.2
+,,,,,,,1278,,,,,,,,,,,,,SE off,,,Section 2.2
