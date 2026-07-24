@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Numeric core for the WGS 84 / Mozambique LAEA defining note.
+"""Numeric core for the WGS 84 / LAEA Mozambique defining note.
 
 Single source of truth for every quantitative claim in the note. Three clients
 consume these functions:
@@ -39,6 +39,8 @@ from pathlib import Path
 
 import numpy as np
 from pyproj import CRS, Geod, Proj
+from pyproj.crs import ProjectedCRS
+from pyproj.crs.coordinate_operation import LambertAzimuthalEqualAreaConversion
 from shapely.geometry import Point, shape
 from shapely.prepared import prep
 
@@ -54,30 +56,39 @@ WGS84 = Geod(ellps="WGS84")
 # All coordinates in this module are (lon, lat), degrees. One convention only.
 LAEA_PROJ = "+proj=laea +lat_0=-18.5 +lon_0=35.5 +x_0=0 +y_0=0 +datum=WGS84 +units=m"
 
+# Equal-area candidates. All are true equal-area on the WGS 84 ellipsoid EXCEPT
+# where noted. PROJ's transverse cylindrical equal area (tcea) is a spherical-only
+# implementation, so it does NOT preserve area on the ellipsoid; it is therefore
+# excluded from the comparison and discussed only in prose (non-registrable too).
 CANDIDATES = {
     "LAEA (this CRS)": LAEA_PROJ,
     "Albers MZ -13/-24": "+proj=aea +lat_1=-13 +lat_2=-24 +lat_0=-18.5 +lon_0=35.5 +datum=WGS84 +units=m",
+    "Bonne lat_1=-18.5": "+proj=bonne +lat_1=-18.5 +lon_0=35.5 +datum=WGS84 +units=m",
     "Africa Albers 102022": "+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25 +datum=WGS84 +units=m",
     "CEA lat_ts=-18.5": "+proj=cea +lat_ts=-18.5 +lon_0=35.5 +datum=WGS84 +units=m",
-    "TCEA lon_0=35.5": "+proj=tcea +lon_0=35.5 +datum=WGS84 +units=m",
 }
-REGISTRABLE = ("LAEA (this CRS)", "Albers MZ -13/-24", "Africa Albers 102022")
+REGISTRABLE = ("LAEA (this CRS)", "Albers MZ -13/-24", "Bonne lat_1=-18.5",
+               "Africa Albers 102022")
 
 # Display names used in the rendered tables
 LABELS = {
     "LAEA (this CRS)": "**LAEA 18.5°S / 35.5°E (this CRS)**",
     "Albers MZ -13/-24": "Albers Equal Area, parallels 13°/24° S",
+    "Bonne lat_1=-18.5": "Bonne, standard parallel 18.5° S (EPSG method 9827)",
     "Africa Albers 102022": "Africa Albers (ESRI:102022, 20°N/23°S)",
     "CEA lat_ts=-18.5": "Lambert Cylindrical EA, lat_ts 18.5°S",
-    "TCEA lon_0=35.5": "Transverse Cylindrical EA, lon_0 35.5°E",
 }
 
-EXTREMES = {  # (lon, lat): onshore extremes and offshore bounding-box corners
-    "N tip": (40.44, -10.47),
-    "S tip": (32.89, -26.87),
-    "W edge": (30.21, -16.50),
-    "NE off": (43.03, -10.09),
-    "SE off": (43.03, -27.71),
+# Extreme points evaluated for Table 1. The onshore points are the actual extreme
+# vertices of the bundled 1:10M boundary; the two "corner" points are the corners
+# of the EPSG extent 1167 bounding box (offshore), not land.
+EXTREMES = {  # (lon, lat); onshore points are exact 1:10M boundary vertices
+    "N tip": (40.4539, -10.4690),    # northernmost onshore vertex
+    "S tip": (32.3522, -26.8603),    # southernmost onshore vertex
+    "W edge": (30.2138, -14.9885),   # westernmost onshore vertex
+    "E edge": (40.8480, -14.7050),   # easternmost onshore vertex
+    "NE corner": (43.03, -10.09),    # offshore bounding-box corner
+    "SE corner": (43.03, -27.71),    # offshore bounding-box corner
 }
 TEST_POINTS = {  # (lon, lat); exact sexagesimal inputs as repeating decimals
     "Maputo": (32.5833333333, -25.9666666667),
@@ -96,13 +107,6 @@ EXTENT_1167 = (30.21, -27.71, 43.03, -10.09)  # (W, S, E, N) EPSG extent, Mozamb
 ONSHORE_LONS = np.arange(30.2, 40.9, 0.1)
 ONSHORE_LATS = np.arange(-26.9, -10.4, 0.1)
 
-# Registered equal-area CRSs benchmarked over their own areas of use
-PEERS = {
-    "US National Atlas Equal Area, EPSG:9311 (USGS)": 9311,
-    "ETRS89-extended / LAEA Europe, EPSG:3035 (EEA)": 3035,
-    "GDA94 / Australian Albers, EPSG:3577 (Geoscience Australia)": 3577,
-    "NAD83 / Conus Albers, EPSG:5070 (USGS)": 5070,
-}
 
 _PROJ_CACHE: dict[str, Proj] = {}
 
@@ -114,6 +118,45 @@ def get_proj(spec) -> Proj:
         crs = spec if isinstance(spec, CRS) else CRS.from_user_input(spec)
         _PROJ_CACHE[key] = Proj(crs)
     return _PROJ_CACHE[key]
+
+
+CRS_SCOPE = "Statistical analysis."
+
+
+def authoritative_wkt() -> str:
+    """Emit the authoritative WKT2:2019 for the proposed CRS.
+
+    Built with pyproj so it is guaranteed conformant to ISO 19162:2019: the base
+    is the WGS 84 datum ENSEMBLE (not a plain DATUM, which is the WKT2:2015 form),
+    the coordinate system is Cartesian easting/northing E,N (EPSG CS 4400), and
+    the method carries EPSG code 9820. A USAGE block with scope, area and bounding
+    box is appended. The result round-trips through CRS.from_wkt.
+    """
+    conv = LambertAzimuthalEqualAreaConversion(
+        latitude_natural_origin=-18.5, longitude_natural_origin=35.5,
+        false_easting=0, false_northing=0)
+    conv_d = conv.to_json_dict()
+    conv_d["name"] = "Mozambique Lambert Azimuthal Equal Area"
+    crs = ProjectedCRS(
+        conversion=LambertAzimuthalEqualAreaConversion.from_json_dict(conv_d),
+        geodetic_crs=CRS.from_epsg(4326),
+        name="WGS 84 / LAEA Mozambique")
+    wkt = crs.to_wkt(version="WKT2_2019", pretty=True)
+    wkt = wkt.replace('AXIS["(E)",east', 'AXIS["easting (E)",east')
+    wkt = wkt.replace('AXIS["(N)",north', 'AXIS["northing (N)",north')
+    # Complete the WGS 84 ensemble membership to the current EPSG dataset (v11.022):
+    # G2296 (datum 1383) was added in 2024. This local PROJ bundles an earlier EPSG
+    # version, so the member is appended here; the ensemble list is reference-only
+    # (see the note in report.qmd) and not part of the frozen normative content.
+    if "G2296" not in wkt:
+        wkt = wkt.replace(
+            'MEMBER["World Geodetic System 1984 (G2139)"],',
+            'MEMBER["World Geodetic System 1984 (G2139)"],\n'
+            '            MEMBER["World Geodetic System 1984 (G2296)"],')
+    usage = (',\n    USAGE[\n        SCOPE["' + CRS_SCOPE + '"],\n'
+             '        AREA["Mozambique - onshore and offshore."],\n'
+             '        BBOX[-27.71,30.21,-10.09,43.03]]')
+    return wkt.rstrip()[:-1] + usage + ']'
 
 
 # =========================================================================== #
@@ -180,15 +223,6 @@ def onshore_mask(prepared, lons=None, lats=None):
     return LO.ravel(), LA.ravel(), flat
 
 
-def grid_stats(spec, west, south, east, north, step):
-    """Max, median and sample count of omega over a regular bbox grid."""
-    LO, LA = np.meshgrid(np.arange(west, east + 1e-9, step),
-                         np.arange(south, north + 1e-9, step))
-    w = omega_pyproj(spec, LO.ravel(), LA.ravel())
-    w = w[np.isfinite(w)]
-    return float(np.max(w)), float(np.median(w)), int(w.size)
-
-
 # =========================================================================== #
 # SECTION 3. Tables (pure data; consumed by report.qmd and by main)
 # =========================================================================== #
@@ -220,20 +254,6 @@ def table2_onshore(prepared):
     return rows, int(mask.sum())
 
 
-def table3_peers():
-    """Table 3: registered equal-area CRSs, each over its own area of use."""
-    rows = []
-    for name, code in PEERS.items():
-        crs = CRS.from_epsg(code)
-        west, south, east, north = crs.area_of_use.bounds
-        if west > east:                       # antimeridian; clip to the main body
-            west, east = -170.0, -60.0
-        mx, med, _ = grid_stats(crs, west, south, east, north, 0.5)
-        rows.append({"crs": name, "median": round(med, 2), "max": round(mx, 2)})
-    mx, med, _ = grid_stats(LAEA_PROJ, *EXTENT_1167, 0.2)
-    rows.append({"crs": "**WGS 84 / Mozambique LAEA (this proposal)**",
-                 "median": round(med, 2), "max": round(mx, 2)})
-    return rows
 
 
 def table_test_points():
@@ -292,6 +312,42 @@ def origin_distances():
     return rows
 
 
+def origin_optimality(prepared):
+    """Show the adopted origin is near the min-max optimum for onshore omega.
+
+    Compares three origins by their maximum onshore angular deformation: the
+    adopted (rounded) origin, the exact onshore midpoint (unrounded), and the
+    min-max optimal origin found by a coarse grid search. Demonstrates that
+    rounding to the half degree does not cost accuracy (it in fact improves on
+    the exact midpoint) and that the adopted origin is within a few percent of
+    the optimum, so the choice is justified, not merely aesthetic.
+    """
+    lon_flat, lat_flat, mask = onshore_mask(prepared)
+    lons, lats = lon_flat[mask], lat_flat[mask]
+
+    def onshore_max(o_lon, o_lat):
+        spec = (f"+proj=laea +lat_0={o_lat} +lon_0={o_lon} "
+                f"+x_0=0 +y_0=0 +datum=WGS84 +units=m")
+        return float(np.nanmax(omega_pyproj(spec, lons, lats)))
+
+    adopted = onshore_max(*ORIGIN)
+    midpoint = onshore_max(35.53, -18.66)          # onshore midpoint (0.01 deg)
+    best_max, best_origin = 1e9, None
+    for o_lat in np.arange(-19.4, -18.0, 0.05):
+        for o_lon in np.arange(35.6, 37.4, 0.05):
+            m = onshore_max(o_lon, o_lat)
+            if m < best_max:
+                best_max, best_origin = m, (round(o_lon, 2), round(o_lat, 2))
+    return {
+        "adopted_max": round(adopted, 3),
+        "midpoint_max": round(midpoint, 3),
+        "optimal_max": round(best_max, 3),
+        "optimal_lon": best_origin[0],
+        "optimal_lat": best_origin[1],
+        "gap_percent": round((adopted - best_max) / best_max * 100, 1),
+    }
+
+
 # =========================================================================== #
 # SECTION 4. Emitters
 # =========================================================================== #
@@ -346,11 +402,11 @@ def all_sections(prepared):
     return {
         "Table 1": table1_extremes(),
         "Table 2": t2,
-        "Table 3": table3_peers(),
         "Section 8": table_test_points(),
         "Section 3 crosscheck": crosscheck_africa_albers(),
         "CRS crosscheck": crosscheck_laea(),
         "Section 2.2": origin_distances(),
+        "Origin optimality": [origin_optimality(prepared)],
     }, n_onshore
 
 
@@ -385,9 +441,6 @@ def main() -> None:
         print(f"  {plain(row['projection']):<40} median {row['median']:.3f} "
               f"p95 {row['p95']:.3f}  max {row['max']:.3f}")
 
-    print("\n[Table 3] registered equal-area CRSs over their own areas of use")
-    for row in sections["Table 3"]:
-        print(f"  {plain(row['crs']):<58} median {row['median']:.2f}  max {row['max']:.2f}")
 
     print("\n[Section 8] test points and inverse round-trip")
     for row in sections["Section 8"]:

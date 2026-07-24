@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate every figure in the WGS 84 / Mozambique LAEA defining note.
+"""Regenerate every figure in the WGS 84 / LAEA Mozambique defining note.
  
 All distortion mathematics is imported from reproduce.py, so the figures and
 the tables are computed by exactly the same functions and cannot drift apart.
@@ -16,7 +16,6 @@ Outputs (written next to this script):
     fig1_omega_field.png     distortion field of the proposed CRS
     fig2_omega_cdf.png       onshore cumulative distribution, registrable CRSs
     fig3_country_fill.png    the country in each projection, common scale
-    fig4_peer_benchmark.png  registered equal-area CRSs over their own extents
  
 Methodological limitations: distortion is evaluated pointwise on regular grids;
 onshore statistics use a 0.1 degree grid and the bundled 1:10M boundary.
@@ -42,11 +41,9 @@ from reproduce import (
     EXTREMES,
     LAEA_PROJ,
     ORIGIN,
-    PEERS,
     REGISTRABLE,
     TEST_POINTS,
     get_proj,
-    grid_stats,
     load_boundary,
     omega_pyproj,
     onshore_mask,
@@ -145,7 +142,7 @@ def figure1(geom):
                  label="Maximum angular deformation ω (degrees)")
     ax.set_xlabel("Longitude (°E)")
     ax.set_ylabel("Latitude (°)")
-    ax.set_title("WGS 84 / Mozambique LAEA: shape distortion field", fontsize=10)
+    ax.set_title("WGS 84 / LAEA Mozambique: shape distortion field", fontsize=10)
     ax.legend(loc="lower left", fontsize=8)
     ax.set_aspect(1 / np.cos(np.radians(18.5)))
     fig.tight_layout()
@@ -162,16 +159,18 @@ def figure2(prepared):
  
     colours = {"LAEA (this CRS)": "#1a6390",
                "Albers MZ -13/-24": "#c0392b",
+               "Bonne lat_1=-18.5": "#8e44ad",
                "Africa Albers 102022": "#7f8c8d"}
-    labels = {"LAEA (this CRS)": "WGS 84 / Mozambique LAEA (this CRS)",
+    labels = {"LAEA (this CRS)": "WGS 84 / LAEA Mozambique (this CRS)",
               "Albers MZ -13/-24": "Albers Equal Area 13°/24° S",
+              "Bonne lat_1=-18.5": "Bonne, standard parallel 18.5° S",
               "Africa Albers 102022": "Africa Albers (ESRI:102022)"}
  
     fig, ax = plt.subplots(figsize=(7.0, 4.4))
     ax.axhline(50, color="0.55", linewidth=0.8, linestyle=":", zorder=1)
     ax.text(0.0055, 51.5, "half the country", fontsize=7, color="0.4")
  
-    for name in REGISTRABLE:
+    for i, name in enumerate(REGISTRABLE):
         w = omega_pyproj(CANDIDATES[name], lon_flat[mask], lat_flat[mask])
         w = np.sort(w[np.isfinite(w)])
         cdf = np.arange(1, w.size + 1) / w.size * 100
@@ -182,12 +181,15 @@ def figure2(prepared):
         # mark where the whole country is covered
         ax.plot([worst], [100], "|", color=colours[name], markersize=9,
                 markeredgewidth=1.8, zorder=4)
+        # place each worst-value label above its own marker, in the white space over
+        # the 100% line; stagger the close pair (Albers 0.71 / Bonne 0.66) in height
         ax.annotate(f"{worst:.2f}°", (worst, 100), textcoords="offset points",
-                    xytext=(3, -11), fontsize=7.5, color=colours[name])
+                    xytext=(0, 4 + (i % 2) * 12), ha="center", va="bottom",
+                    fontsize=7.5, color=colours[name])
  
     ax.set_xscale("log")
     ax.set_xlim(0.005, 10)
-    ax.set_ylim(0, 108)
+    ax.set_ylim(0, 116)
     ax.set_yticks([0, 20, 40, 60, 80, 100])
     ax.set_xlabel("Shape distortion ω (degrees, log scale)")
     ax.set_ylabel("Percentage of the country\nbelow that distortion (%)")
@@ -205,7 +207,7 @@ def figure2(prepared):
 # --------------------------------------------------------------------------- #
 def figure3(geom, prepared):
     panels = [
-        ("LAEA (this CRS)", "WGS 84 / Mozambique LAEA", "Isotropic, minimal, uniform"),
+        ("LAEA (this CRS)", "WGS 84 / LAEA Mozambique", "Isotropic, minimal, uniform"),
         ("Albers MZ -13/-24", "Albers Equal Area 13°/24° S", "Low, banded by latitude"),
         ("Africa Albers 102022", "Africa Albers (ESRI:102022)", "Continental fallback: strong"),
     ]
@@ -232,6 +234,13 @@ def figure3(geom, prepared):
     grat_lon = np.linspace(29.2, 41.9, 120)
     norm = Normalize(0, CAP)
  
+    # Panel max labels are computed on the standard 0.1 deg onshore grid (the same
+    # grid as Table 2 / reproduce.py), NOT on this figure's finer display grid, so
+    # the numbers on the figure agree with the numbers in the table.
+    olon, olat, omask = onshore_mask(prepared)
+    panel_max = {key: float(np.nanmax(omega_pyproj(CANDIDATES[key], olon[omask], olat[omask])))
+                 for key, _, _ in panels}
+
     fig, axes = plt.subplots(1, 3, figsize=(14.5, 7.4))
     for ax, (key, title, caption) in zip(axes, panels):
         P = get_proj(CANDIDATES[key])
@@ -269,7 +278,7 @@ def figure3(geom, prepared):
         ax.text(bar_x + 100_000, bar_y + 0.02 * 2 * half, "200 km",
                 ha="center", fontsize=7, zorder=5)
  
-        ax.set_title(f"{title}\nmax shape distortion = {np.nanmax(W_in):.2f}°",
+        ax.set_title(f"{title}\nmax shape distortion = {panel_max[key]:.2f}°",
                      fontsize=10.5, pad=8)
         ax.text(0.5, -0.02, caption, transform=ax.transAxes, ha="center",
                 va="top", fontsize=9, color="0.25")
@@ -289,68 +298,10 @@ def figure3(geom, prepared):
     return fig
  
  
-# --------------------------------------------------------------------------- #
-# Figure 4: peer benchmark, values computed rather than transcribed
-# --------------------------------------------------------------------------- #
-def figure4():
-    rows = []
-    for name, code in PEERS.items():
-        crs = CRS.from_epsg(code)
-        west, south, east, north = crs.area_of_use.bounds
-        if west > east:                      # antimeridian; clip to the main body
-            west, east = -170.0, -60.0
-        mx, med, _ = grid_stats(crs, west, south, east, north, 0.5)
-        rows.append((name, med, mx))
-    mx, med, _ = grid_stats(LAEA_PROJ, *EXTENT_1167, 0.2)
-    rows.append(("Mozambique LAEA (this proposal)", med, mx))
- 
-    rows.sort(key=lambda r: r[1], reverse=True)
-    names = [r[0] for r in rows]
-    medians = [r[1] for r in rows]
-    maxima = [r[2] for r in rows]
-    y = np.arange(len(rows))
-
-    def two_line(name):
-        """Split 'Name, EPSG:code (agency)' onto two lines for a tidy y-axis."""
-        if ", EPSG:" in name:
-            head, tail = name.split(", EPSG:", 1)
-            return f"{head}\nEPSG:{tail}"
-        return name
-    labels = [two_line(n) for n in names]
- 
-    fig, ax = plt.subplots(figsize=(8.4, 4.8))
-    ax.barh(y + 0.18, maxima, height=0.34, color="#d9a441",
-            label="maximum ω over area of use")
-    ax.barh(y - 0.18, medians, height=0.34, color="#2c6e8f",
-            label="median ω over area of use")
-    for i, (med_v, max_v) in enumerate(zip(medians, maxima)):
-        ax.text(max_v * 1.04, i + 0.18, f"{max_v:.1f}°", va="center", fontsize=7.5)
-        ax.text(med_v * 1.06, i - 0.18, f"{med_v:.2f}°", va="center", fontsize=7.5)
- 
-    ax.set_yticks(y)
-    ax.set_yticklabels(labels, fontsize=8)
-    ax.tick_params(axis="y", length=0)          # labels read as a list, no tick dashes
-    for tick, name in zip(ax.get_yticklabels(), names):  # emphasise the proposed CRS
-        if "this proposal" in name:
-            tick.set_fontweight("bold")
-            tick.set_color("#1a4a63")
-    ax.set_xscale("log")
-    ax.set_xlim(0.1, 40)
-    ax.set_xlabel("Angular deformation ω (degrees, log scale)")
-    ax.set_title("Registered equal-area CRSs, each over its own area of use",
-                 fontsize=10.5)
-    ax.legend(fontsize=8, loc="upper right", framealpha=0.9)  # top-right is empty here
-    ax.grid(axis="x", alpha=0.3, which="both")
-    ax.set_axisbelow(True)                       # grid behind the bars
-    fig.tight_layout()
-    return fig
- 
- 
 FIGURES = {
     "fig1_omega_field": figure1,
     "fig2_omega_cdf": figure2,
     "fig3_country_fill": figure3,
-    "fig4_peer_benchmark": figure4,
 }
  
  
@@ -360,7 +311,7 @@ def build(name, geom=None, prepared=None):
         geom, prepared = load_boundary()
     fn = FIGURES[name]
     args = {"fig1_omega_field": (geom,), "fig2_omega_cdf": (prepared,),
-            "fig3_country_fill": (geom, prepared), "fig4_peer_benchmark": ()}[name]
+            "fig3_country_fill": (geom, prepared)}[name]
     return fn(*args)
  
  

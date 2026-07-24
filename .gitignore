@@ -14,7 +14,6 @@ output/*
 !output/fig1_omega_field.png
 !output/fig2_omega_cdf.png
 !output/fig3_country_fill.png
-!output/fig4_peer_benchmark.png
 
 # OS
 .DS_Store

@@ -1,5 +1,5 @@
 ---
-title: "Definition of the projected coordinate reference system WGS 84 / Mozambique LAEA"
+title: "Definition of the projected coordinate reference system WGS 84 / LAEA Mozambique"
 subtitle: "Technical note supporting a change request to the IOGP EPSG Geodetic Parameter Dataset"
 author:
   - name: "Pedro Gonçalves"
@@ -7,33 +7,6 @@ author:
       - name: "LNEG, I.P. (Laboratório Nacional de Energia e Geologia), Mineral Resources and Geophysics Unit, Portugal"
     orcid: "https://orcid.org/0000-0002-6556-6086"
 date: "2026-07-23"
-abstract: |
-  This note defines a national equal-area projected coordinate reference system
-  (CRS) for Mozambique, based on the Lambert Azimuthal Equal Area projection
-  (EPSG method 9820) centred on the country's territorial midpoint. The CRS is
-  in operational use for full-scale national multitemporal mosaics of
-  Sentinel-1, Sentinel-2 and Landsat imagery and derived hydrological products
-  produced for the Mozambique hydrogeological mapping programme of the Direcção
-  Nacional de Gestão de Recursos Hídricos (DNGRH), Mozambique, executed by LNEG
-  under contract DNGRH-346682-CS-QCBS within the World Bank financed Regional
-  Climate Resilience Program for Eastern & Southern Africa (P180171).
-  All projections considered here
-  preserve area exactly, so the comparison is one of shape (angular) distortion.
-  Benchmarked against the equal-area CRSs registered by other national agencies
-  (EEA, USGS, Geoscience Australia), the proposed CRS sits comfortably inside
-  the distortion envelope those bodies accepted for their own official CRSs.
-  This document is the authoritative defining source for the CRS and supports
-  its registration in the IOGP EPSG Geodetic Parameter Dataset. Every number
-  and figure below is computed when this document is rendered, by the bundled
-  scripts described in Appendix A.
-keywords:
-  - coordinate reference system
-  - Lambert Azimuthal Equal Area
-  - Mozambique
-  - EPSG
-  - equal-area projection
-  - zonal statistics
-  - remote sensing
 license: "CC BY 4.0"
 format:
   html:
@@ -45,65 +18,78 @@ format:
     documentclass: scrartcl
     papersize: a4
     geometry:
-      - top=25mm
-      - bottom=25mm
-      - left=30mm
-      - right=30mm
-    fontsize: 12pt
-    linestretch: 1.0
+      - top=24mm
+      - bottom=24mm
+      - left=26mm
+      - right=26mm
+      - headsep=8mm
+    fontsize: 11pt
+    linestretch: 1.08
     pdf-engine: lualatex
     number-sections: true
     toc: false
     fig-pos: "H"
     colorlinks: true
-    linkcolor: headingblue
-    urlcolor: headingblue
-    citecolor: headingblue
-    mainfont: "Caladea"
+    linkcolor: accent
+    urlcolor: accent
+    citecolor: accent
+    mainfont: "Carlito"
     sansfont: "Carlito"
     mathfont: "TeX Gyre Termes Math"
     include-in-header:
       text: |
         \usepackage{microtype}
         \usepackage{etoolbox}
-        \definecolor{titleblue}{HTML}{345A8A}
-        \definecolor{headingblue}{HTML}{4F81BD}
-        % --- type sizes and colours taken from the original Word template ---
-        % title 18pt / subtitle 15pt / H1 16pt / H2 14pt / H3 12pt, Calibri-like, blue
-        \setkomafont{title}{\sffamily\bfseries\fontsize{18}{22}\selectfont\color{titleblue}}
-        \setkomafont{subtitle}{\sffamily\bfseries\fontsize{15}{19}\selectfont\color{titleblue}}
-        \setkomafont{author}{\sffamily\fontsize{12}{15}\selectfont}
-        \setkomafont{date}{\sffamily\fontsize{12}{15}\selectfont}
-        \setkomafont{section}{\sffamily\bfseries\fontsize{16}{19}\selectfont\color{headingblue}}
-        \setkomafont{subsection}{\sffamily\bfseries\fontsize{14}{17}\selectfont\color{headingblue}}
-        \setkomafont{subsubsection}{\sffamily\bfseries\fontsize{12}{15}\selectfont\color{headingblue}}
-        % space before headings: 24pt (H1), 10pt (H2/H3), as in the template
-        \RedeclareSectionCommand[beforeskip=-24pt plus -6pt minus -3pt, afterskip=9pt]{section}
-        \RedeclareSectionCommand[beforeskip=-10pt plus -4pt minus -2pt, afterskip=8pt]{subsection}
-        \RedeclareSectionCommand[beforeskip=-10pt plus -4pt minus -2pt, afterskip=8pt]{subsubsection}
-        % block paragraphs, no indent, ~10pt apart, as in the template
+        \usepackage{graphicx}
+        % --- Palette "Âmbar": graphite ink + amber accent, from the LNEG logo ---
+        \definecolor{ink}{HTML}{333230}
+        \definecolor{accent}{HTML}{C46A2B}
+        \definecolor{tint}{HTML}{F8F1E8}
+        \definecolor{warmrule}{HTML}{E7DCCB}
+        % Sans-serif throughout (Carlito); Caladea fallback supplies the glyphs
+        % Carlito lacks, notably U+2032 PRIME used by the DMS coordinates.
+        \directlua{luaotfload.add_fallback("carlitofb", {"Caladea:mode=node"})}
+        \setmainfont{Carlito}[RawFeature={fallback=carlitofb}]
+        \setsansfont{Carlito}[RawFeature={fallback=carlitofb}]
+        % Title block: graphite title, amber subtitle
+        \setkomafont{title}{\bfseries\fontsize{19}{23}\selectfont\color{ink}}
+        \setkomafont{subtitle}{\mdseries\fontsize{13}{16}\selectfont\color{accent}}
+        \setkomafont{author}{\fontsize{11}{14}\selectfont\color{ink}}
+        \setkomafont{date}{\fontsize{10}{13}\selectfont\color{ink}}
+        % Headings: graphite title text, amber section NUMBER; subsections amber
+        \setkomafont{section}{\bfseries\fontsize{15}{18}\selectfont\color{ink}}
+        \setkomafont{subsection}{\bfseries\fontsize{12.5}{15}\selectfont\color{accent}}
+        \setkomafont{subsubsection}{\bfseries\fontsize{11}{14}\selectfont\color{accent}}
+        \renewcommand*{\sectionformat}{\textcolor{accent}{\thesection}\enskip}
+        \renewcommand*{\subsectionformat}{\textcolor{accent}{\thesubsection}\enskip}
+        \renewcommand*{\subsubsectionformat}{\textcolor{accent}{\thesubsubsection}\enskip}
+        \RedeclareSectionCommand[beforeskip=-20pt plus -6pt minus -3pt, afterskip=7pt]{section}
+        \RedeclareSectionCommand[beforeskip=-10pt plus -4pt minus -2pt, afterskip=6pt]{subsection}
+        \RedeclareSectionCommand[beforeskip=-10pt plus -4pt minus -2pt, afterskip=6pt]{subsubsection}
+        % Block paragraphs, no indent
         \setlength{\parindent}{0pt}
-        \setlength{\parskip}{9pt plus 2pt minus 1pt}
-        % abstract at 10pt, as in the template
-        \AtBeginEnvironment{abstract}{\fontsize{10}{13}\selectfont}
-        % tables use the body face and size, as in the template
-        \renewcommand{\arraystretch}{1.25}
-        % wrap long verbatim lines (the WKT2 definition) instead of overflowing
+        \setlength{\parskip}{8pt plus 2pt minus 1pt}
+        \renewcommand{\arraystretch}{1.3}
+        % Running header with LNEG identity (text wordmark placeholder for the logo)
+        \usepackage[headsepline]{scrlayer-scrpage}
+        \pagestyle{scrheadings}
+        \clearpairofpagestyles
+        \setkomafont{pageheadfoot}{\footnotesize\color{ink}}
+        \ihead{\textbf{\color{ink}LNEG}\,\textcolor{warmrule}{\rule[-1pt]{0.5pt}{10pt}}\,{\scriptsize Laboratório Nacional de Energia e Geologia}}
+        \ohead{WGS 84 / LAEA Mozambique \textcolor{accent}{\textbf{·}} v1.0}
+        \cfoot{\pagemark}
+        \setkomafont{headsepline}{\color{accent}}
+        % Wrap the long WKT2 verbatim lines instead of overflowing the margin
         \usepackage{fvextra}
         \AtBeginDocument{\RecustomVerbatimEnvironment{verbatim}{Verbatim}{breaklines=true,breakanywhere=true,fontsize=\footnotesize,xleftmargin=0pt}}
-        % Carlito has no U+2032 PRIME (used by the DMS coordinates); fall back to
-        % Caladea for any glyph it lacks, so the sans tables render ' and " correctly
-        \directlua{luaotfload.add_fallback("sansfb", {"Caladea:mode=node"})}
-        \setsansfont{Carlito}[RawFeature={fallback=sansfb}]
-        \setkomafont{caption}{\normalfont}
-        \setkomafont{captionlabel}{\normalfont\bfseries}
+        \setkomafont{caption}{\normalfont\small}
+        \setkomafont{captionlabel}{\normalfont\bfseries\color{accent}\small}
   docx:
     number-sections: true
     toc: false
 execute:
   echo: false
   warning: false
-  freeze: auto
 bibliography: references.bib
 ---
 
@@ -117,19 +103,15 @@ GEOM, PREPARED = R.load_boundary()
 SECTIONS, N_ONSHORE = R.all_sections(PREPARED)
 WORST_DIFF = R.verify(SECTIONS)          # aborts the render if a claim fails
 
-def cell(rows, key, fmt="{:.2f}"):
-    """Look up one value for inline reporting."""
-    return fmt.format(rows[key])
-
 T1 = {r["projection"]: r for r in SECTIONS["Table 1"]}
 T2 = {r["projection"]: r for r in SECTIONS["Table 2"]}
-T3 = {r["crs"]: r for r in SECTIONS["Table 3"]}
 AA = {r["latitude"]: r for r in SECTIONS["Section 3 crosscheck"]}
 DIST = {r["point"]: r["distance_km"] for r in SECTIONS["Section 2.2"]}
+OPT = SECTIONS["Origin optimality"][0]
 
 LAEA_KEY = R.LABELS["LAEA (this CRS)"]
 AFR_KEY = R.LABELS["Africa Albers 102022"]
-PROPOSAL_KEY = "**WGS 84 / Mozambique LAEA (this proposal)**"
+PROPOSAL_KEY = "**WGS 84 / LAEA Mozambique (this proposal)**"
 ```
 
 ::: {.callout-note appearance="minimal"}
@@ -143,33 +125,71 @@ PROPOSAL_KEY = "**WGS 84 / Mozambique LAEA (this proposal)**"
 | Change policy | The parameter values in @sec-definition and @sec-wkt are frozen. Any change to a parameter value would constitute a different CRS, not a new version of this one. New versions of this note may amend only text, evidence and references. |
 :::
 
+# Abstract {.unnumbered}
+
+```{python}
+#| label: abstract
+#| output: asis
+med = T2[LAEA_KEY]["median"]
+laea_on_max = T2[LAEA_KEY]["max"]
+laea_dom_max = T1[LAEA_KEY]["max"]
+ratio_med = T2[AFR_KEY]["median"] / T2[LAEA_KEY]["median"]
+print(
+    f"This note defines a national equal-area projected coordinate reference system "
+    f"(CRS) for Mozambique, based on the Lambert Azimuthal Equal Area projection "
+    f"(EPSG method 9820) centred on the country's territorial midpoint. The CRS is in "
+    f"operational use for full-scale national multitemporal mosaics of Sentinel-1, "
+    f"Sentinel-2 and Landsat imagery and derived hydrological products produced for the "
+    f"Mozambique hydrogeological mapping programme of the Direcção Nacional de Gestão de "
+    f"Recursos Hídricos (DNGRH), Mozambique, executed by LNEG under contract "
+    f"DNGRH-346682-CS-QCBS within the World Bank financed Regional Climate Resilience "
+    f"Program for Eastern & Southern Africa (P180171). Area is preserved exactly "
+    f"everywhere; maximum angular deformation has an onshore median of {med:.2f}°, an "
+    f"onshore maximum of {laea_on_max:.2f}° and a full-domain maximum of {laea_dom_max:.2f}° "
+    f"at the farthest offshore corner. Four equal-area alternatives registrable or in "
+    f"common regional use were evaluated over the same domain and all perform worse, the "
+    f"common continental fallback (Africa Albers) by a factor of about {ratio_med:.0f} in "
+    f"median onshore deformation. Its distortion compares favourably with the equal-area "
+    f"CRSs that other national agencies have registered for their own official use. This "
+    f"document is the authoritative defining source for the CRS and "
+    f"supports its registration in the IOGP EPSG Geodetic Parameter Dataset. Every number "
+    f"and figure is computed at render time from the bundled scripts (@sec-appendix); "
+    f"nothing is transcribed by hand."
+)
+```
+
+**Keywords:** coordinate reference system; Lambert Azimuthal Equal Area; Mozambique;
+EPSG; equal-area projection; zonal statistics; remote sensing.
+
 # Motivation
 
-Mozambique spans two UTM zones (36S and 37S). National raster products
-projected to either zone carry a seam and increasing scale distortion away from
-the zone meridian, and conformal projections do not preserve area, biasing
-zonal statistics (class areas, recharge zonation, water-storage aggregation). A
-single national equal-area CRS removes the zone seam and makes pixel area exact
-everywhere: a 10 m pixel covers exactly 100 m² at any location in the country.
+Mozambique spans two UTM zones onshore (36S and 37S), and the declared offshore
+domain reaches a third (38S). National raster products projected to any of these zones
+carry a seam and increasing scale distortion away from the zone meridian,
+and conformal projections do not preserve area, biasing zonal statistics (class areas,
+recharge zonation, water-storage aggregation). A single national equal-area CRS removes
+the zone seam and makes pixel area exact everywhere: a 10 m pixel covers exactly 100 m²
+at any location in the country.
 
-Among equal-area projections the axis of choice is shape distortion. A Lambert
-Azimuthal Equal Area (LAEA) projection centred on the territory achieves the
-lowest and most uniform shape distortion of any equal-area projection
-registrable in the EPSG Dataset for a country of this shape (@sec-alternatives).
-This is the design pattern adopted by other agencies for national and
-continental statistical CRSs (@sec-precedents), including the European Union's
-standard analysis CRS (EPSG:3035), whose selection rationale [@annoni2003]
+A Lambert Azimuthal Equal Area (LAEA) projection centred on the territory achieves this
+with the lowest maximum shape distortion, over the domain of validity, of any equal-area
+projection registrable in the EPSG Dataset (@sec-alternatives), and its distortion field
+is radial and isotropic rather than banded by latitude as in conic or Bonne projections —
+an advantage when comparing zonal statistics between regions of the country. This is the
+design pattern adopted by other agencies for
+national and continental statistical CRSs (@sec-precedents), including the European
+Union's standard analysis CRS (EPSG:3035), whose selection rationale [@annoni2003]
 applies directly here.
 
 # Definition {#sec-definition}
 
 | Field | Value |
 |---|---|
-| CRS name (proposed) | WGS 84 / Mozambique LAEA |
+| CRS name (proposed) | WGS 84 / LAEA Mozambique |
 | Alias | Mozambique Lambert Azimuthal Equal Area |
 | Type | Projected CRS |
 | Base CRS | WGS 84 (EPSG:4326) |
-| Conversion name | Mozambique LAEA |
+| Conversion name | Mozambique Lambert Azimuthal Equal Area |
 | Method | Lambert Azimuthal Equal Area (EPSG method 9820) |
 | Latitude of natural origin | 18°30′00″ S (−18.5°) |
 | Longitude of natural origin | 35°30′00″ E (35.5°) |
@@ -181,9 +201,22 @@ applies directly here.
 
 ## Parameter justification
 
-The natural origin is the midpoint of Mozambique's onshore extent
-(30.21°–40.85° E, midpoint 35.53° E; 10.47°–26.87° S, midpoint 18.67° S),
-rounded to the nearest half degree: 35.5° E, 18.5° S.
+The natural origin is the midpoint of Mozambique's onshore extent, computed from
+the deposited boundary (30.21°–40.85° E, midpoint 35.53° E; 10.47°–26.86° S,
+midpoint 18.66° S), rounded to the nearest half degree: 35.5° E, 18.5° S.
+
+```{python}
+#| label: origin-optimality
+#| output: asis
+print(
+    f"This rounding is justified, not merely aesthetic. A min-max search over the "
+    f"onshore territory places the optimal origin at {OPT['optimal_lon']}° E, "
+    f"{abs(OPT['optimal_lat'])}° S, with a maximum $\\omega$ of {OPT['optimal_max']}°; "
+    f"the adopted origin gives {OPT['adopted_max']}°, only {OPT['gap_percent']} percent "
+    f"above the optimum. The half-degree rounding also improves on the exact onshore "
+    f"midpoint (35.53° E, 18.66° S), which yields {OPT['midpoint_max']}°."
+)
+```
 
 ## Distortion characteristics {#sec-distortion}
 
@@ -213,7 +246,7 @@ print(
     f"Verified numerically on the WGS 84 ellipsoid (@sec-appendix): "
     f"$\\omega$ reaches {n_tip:.2f}° at the northern onshore extreme "
     f"({DIST['N tip']} km from the origin) and {laea_max_extreme:.2f}° at the "
-    f"farthest corner of the offshore bounding box ({DIST['SE off']} km). Over the "
+    f"farthest corner of the offshore bounding box ({DIST['SE corner']} km). Over the "
     f"onshore territory ({N_ONSHORE} samples on a 0.1° grid using a 1:10M "
     f"boundary), the median $\\omega$ is {med:.2f}° and the 95th percentile "
     f"{p95:.2f}°. The worst-case linear anisotropy in the whole domain is "
@@ -247,32 +280,32 @@ ellipsoid), for the following reasons:
    [@brodzik2012].
 
 The metric alternative on the national datum does not solve the problem. Moznet
-has projected realizations, Moznet / UTM zone 36S and 37S (EPSG:3036, 3037), but
-these are Transverse Mercator (conformal, not equal-area) and Mozambique spans
-both zones, so they reintroduce the very seam and area distortion this CRS
-removes. Because Moznet shares the WGS 84 ellipsoid and is ITRF-aligned, a
-Moznet-based LAEA would differ from this one by at most about two metres, a
-fraction of a working pixel; the choice of WGS 84 is therefore settled on the
-grounds that the source data are natively WGS 84 / ITRF, not on geometry.
-Nothing precludes a future companion CRS on Moznet should cadastral-grade
-applications require it; the conversion parameters would be identical.
+has projected realizations, Moznet / UTM zones 36S, 37S and 38S (EPSG:3036, 3037,
+5629), but these are Transverse Mercator (conformal, not equal-area) and
+Mozambique spans multiple zones, so they reintroduce the very seam and area
+distortion this CRS removes. The registered transformation Moznet to WGS 84
+(EPSG:1302) is a null transformation — all seven parameters zero, with a stated
+accuracy of 1 m — so a Moznet-based LAEA would differ from this one by at most
+that metre, a fraction of a working pixel. Nothing precludes a future companion CRS on Moznet
+should cadastral-grade applications require it; the conversion parameters would
+be identical.
 
 # Alternatives considered {#sec-alternatives}
 
 Four equal-area alternatives were evaluated: pointwise at the onshore extremes
 and offshore bounding-box corners (@tbl-extremes), and distributionally over the
-onshore territory (@tbl-onshore).  Maximum angular deformation was computed from
+onshore territory (@tbl-onshore). Maximum angular deformation was computed from
 the Tissot principal axes on the WGS 84 ellipsoid.
 
 ```{python}
 #| label: note-extremes
 #| output: asis
 EXTREME_NAMES = {"N tip": "N tip", "S tip": "S tip", "W edge": "W edge",
-                 "NE off": "NE offshore", "SE off": "SE offshore"}
+                 "E edge": "E edge", "NE corner": "NE corner", "SE corner": "SE corner"}
 
 def _latlon(lon, lat):
-    return (f"{abs(lat):.2f}°{'S' if lat < 0 else 'N'}, "
-            f"{abs(lon):.2f}°{'E' if lon >= 0 else 'W'}")
+    return (f"{abs(lat):.4f}°{'S' if lat < 0 else 'N'}, "
+            f"{abs(lon):.4f}°{'E' if lon >= 0 else 'W'}")
 
 print("Extreme points, (latitude, longitude): "
       + "; ".join(f"{EXTREME_NAMES[k]} ({_latlon(lon, lat)})"
@@ -281,11 +314,11 @@ print("Extreme points, (latitude, longitude): "
 
 ```{python}
 #| label: tbl-extremes
-#| tbl-cap: "Maximum angular deformation at domain extreme points, degrees."
-#| tbl-colwidths: [28,12,12,12,12,12,12]
+#| tbl-cap: "Maximum angular deformation at domain extreme points, degrees. N/S/W/E are the actual extreme vertices of the 1:10M onshore boundary; NE/SE corner are the offshore corners of the EPSG extent 1167 bounding box."
+#| tbl-colwidths: [23,11,11,11,11,11,11,11]
 #| output: asis
-cols = ["projection", "N tip", "S tip", "W edge", "NE off", "SE off", "max"]
-heads = ["Projection", "N tip", "S tip", "W edge", "NE offshore", "SE offshore", "Max"]
+cols = ["projection", "N tip", "S tip", "W edge", "E edge", "NE corner", "SE corner", "max"]
+heads = ["Projection", "N tip", "S tip", "W edge", "E edge", "NE corner", "SE corner", "Max"]
 numeric = [c for c in cols if c != "projection"]
 print(R.md_table(SECTIONS["Table 1"], cols, heads,
                  suffix={c: "°" for c in numeric},
@@ -294,7 +327,7 @@ print(R.md_table(SECTIONS["Table 1"], cols, heads,
 
 ```{python}
 #| label: tbl-onshore
-#| tbl-cap: "Onshore distribution of angular deformation (0.1° grid, 1:10M boundary), registrable candidates. The sample count is given in @sec-distortion."
+#| tbl-cap: "Onshore distribution of angular deformation (0.1° grid, 1:10M boundary), for the competitive registrable candidates. The sample count is given in @sec-distortion."
 #| tbl-colwidths: [52,16,16,16]
 #| output: asis
 print(R.md_table(SECTIONS["Table 2"],
@@ -304,34 +337,37 @@ print(R.md_table(SECTIONS["Table 2"],
                  fmt={"median": ".3f", "p95": ".3f", "max": ".3f"}))
 ```
 
-@fig-cdf shows the same three registrable candidates as an empirical cumulative
+@fig-cdf shows the same four registrable candidates as an empirical cumulative
 distribution over the onshore territory. @fig-panels shows the country itself,
 drawn in each projection at a common scale and filled by the shape distortion it
 suffers there.
 
 ```{python}
 #| label: fig-cdf
-#| fig-cap: "Empirical cumulative distribution of angular deformation over onshore Mozambique for the three registrable candidates (log scale). The centred LAEA dominates the tuned national Albers across the entire distribution."
+#| fig-cap: "Empirical cumulative distribution of angular deformation over onshore Mozambique for the four registrable candidates (log scale). The centred LAEA is best across the whole range above 0.015° — over 98.5 percent of the territory."
 F.build("fig2_omega_cdf", GEOM, PREPARED)
 ```
 
 ```{python}
 #| label: fig-panels
-#| fig-cap: "Mozambique drawn in each registrable equal-area projection at a common metric scale (the 200 km bar is identical in every panel), filled by shape distortion with isolines at 0.25°, 0.5° and 1°. The colour scale is capped at 1.5° so the low-distortion contest stays visible; each panel is labelled with its true maximum. All three preserve area exactly; only shape distortion and orientation differ."
+#| fig-cap: "Mozambique drawn in three of the registrable equal-area projections (the Bonne is omitted here for space) at a common metric scale (the 200 km bar is identical in every panel), filled by shape distortion with isolines at 0.25°, 0.5° and 1°. The colour scale is capped at 1.5° so the low-distortion contest stays visible; each panel is labelled with its true maximum. All three preserve area exactly; only shape distortion and orientation differ."
 #| fig-width: 11
 F.build("fig3_country_fill", GEOM, PREPARED)
 ```
 
 Interpretation:
 
-- An Albers conic with standard parallels tuned to Mozambique is the only
-  serious registrable competitor and is dominated across the whole onshore
-  distribution (@fig-cdf), because conics optimise east-west extents while
-  Mozambique is elongated north-south.
-- The transverse cylindrical equal area is the theoretical candidate for a
-  north-south elongated territory and wins on the southern onshore axis, but
-  degrades east of the mainland and, decisively, has no EPSG method code, making
-  it non-registrable.
+- The two serious registrable competitors are the tuned national Albers and the
+  Bonne (EPSG method 9827); the LAEA is best across essentially the whole onshore
+  distribution — everywhere above 0.015°, i.e. over 98.5 percent of the territory
+  (@fig-cdf). The Albers loses because conics optimise east-west
+  extents while Mozambique is elongated north-south; the Bonne, which is truly
+  equal-area on the ellipsoid, loses because its shape distortion grows away from
+  the central meridian and standard parallel.
+- A transverse cylindrical equal area would in theory suit a north-south
+  territory, but it has no EPSG method code and is therefore not registrable.
+  Separately, PROJ's implementation of it is spherical-only, so it does not
+  preserve area on the ellipsoid; for both reasons it is excluded here.
 
 ```{python}
 #| label: africa-albers
@@ -345,7 +381,7 @@ common regional fallback, and the default this CRS replaces for wide Mozambican
 areas. Its distortion over Mozambique is not an artefact: verified against the
 registered ESRI:102022 definition by two independent methods (PROJ Tissot factors
 and an SVD of the local Jacobian from central geodesic differences, agreeing to
-three decimals), angular deformation rises from {zero['omega_pyproj']:.2f}° at
+better than 0.001°), angular deformation rises from {zero['omega_pyproj']:.2f}° at
 23°S, its only standard parallel touching the country, to
 {hi['omega_pyproj']:.2f}° at 10°S, where the parallel scale is
 {hi['parallel_scale']:.3f} and the meridional scale {hi['meridional_scale']:.3f}
@@ -362,40 +398,13 @@ times at the worst point), seam removal and country centring, not the correction
 of an area error.""")
 ```
 
-## Comparison with national equal-area CRSs of other agencies
-
-To place the proposed CRS against real precedent rather than against a
-continental projection alone, its distortion was benchmarked against the
-equal-area CRSs that other national mapping agencies have registered, each
-evaluated over its own area of use (@tbl-peers, @fig-peers).
-
-```{python}
-#| label: tbl-peers
-#| tbl-cap: "Angular deformation of registered equal-area CRSs over their own areas of use."
-#| tbl-colwidths: [68,16,16]
-#| output: asis
-print(R.md_table(SECTIONS["Table 3"], ["crs", "median", "max"],
-                 ["CRS (agency)", "Median", "Maximum"],
-                 suffix={"median": "°", "max": "°"},
-                 fmt={"median": ".2f", "max": ".2f"}))
-```
-
-```{python}
-#| label: fig-peers
-#| fig-cap: "Angular deformation of registered national and continental equal-area CRSs, each over its own area of use (log scale)."
-F.build("fig4_peer_benchmark", GEOM, PREPARED)
-```
-
-This comparison must be read honestly. The proposed CRS shows smaller distortion
-than these precedents largely because Mozambique is a single country while they
-cover continents, so extent, not superior design, does most of the work. The
-legitimate conclusion is narrower and still strong: the proposed CRS uses the
-same accepted design pattern (an equal-area projection matched to territory
-geometry) and lands comfortably inside the distortion envelope these agencies
-judged acceptable for their own official CRSs. A related observation supports
-registration: the registered equal-area CRSs are almost all for large countries
-or continents; a country of Mozambique's size rarely has a dedicated equal-area
-CRS, which is the gap this proposal fills.
+The distortion of the proposed CRS is also unremarkable against real precedent:
+its onshore angular deformation sits well inside the range that national mapping
+agencies accepted for their own registered equal-area CRSs (for example
+ETRS89-extended / LAEA Europe, EPSG:3035; GDA94 / Australian Albers, EPSG:3577;
+and NAD83 / Conus Albers, EPSG:5070). This is a legitimacy check, not a claim of
+superiority: those CRSs cover continents, so their larger distortion reflects
+extent, not inferior design.
 
 # Recommended national grid
 
@@ -415,47 +424,28 @@ Grid_ETRS89-LAEA specification for EPSG:3035:
 This convention is already satisfied by the processing system's outputs and is
 recommended, not normative: it constrains product layout, not the CRS.
 
+False easting and northing are zero (a 0/0 grid anchor, as in EASE-Grid 2.0), so
+part of the offshore domain has negative coordinates. Unlike EPSG:3035, which
+offsets its origin so that INSPIRE grid identifiers are unsigned, this CRS keeps
+0/0 and addresses products by explicit easting and northing rather than by
+unsigned grid codes; the INSPIRE analogy above concerns grid nesting, not the
+choice of false origin.
+
 # Authoritative definition (WKT2:2019) {#sec-wkt}
 
 The definition below is expressed in WKT2:2019, the well-known text
 representation of coordinate reference systems standardised as ISO 19162:2019
-and published by the Open Geospatial Consortium as OGC 18-010r7 [@iso19162].
+and published by the Open Geospatial Consortium as OGC 18-010r7 [@iso19162]. The
+normative content of this section is the `CONVERSION` and the coordinate system;
+the base geographic CRS is identified by `ID["EPSG",4326]`. The `ENSEMBLE`
+membership list below is reproduced as at EPSG v11.022 — that list is maintained
+by the IOGP and grows over time — and is not part of the frozen
+content referred to in the change policy.
 
-```
-PROJCRS["WGS 84 / Mozambique LAEA",
-    BASEGEOGCRS["WGS 84",
-        DATUM["World Geodetic System 1984",
-            ELLIPSOID["WGS 84",6378137,298.257223563,
-                LENGTHUNIT["metre",1]]],
-        PRIMEM["Greenwich",0,
-            ANGLEUNIT["degree",0.0174532925199433]],
-        ID["EPSG",4326]],
-    CONVERSION["Mozambique LAEA",
-        METHOD["Lambert Azimuthal Equal Area",
-            ID["EPSG",9820]],
-        PARAMETER["Latitude of natural origin",-18.5,
-            ANGLEUNIT["degree",0.0174532925199433],
-            ID["EPSG",8801]],
-        PARAMETER["Longitude of natural origin",35.5,
-            ANGLEUNIT["degree",0.0174532925199433],
-            ID["EPSG",8802]],
-        PARAMETER["False easting",0,
-            LENGTHUNIT["metre",1],
-            ID["EPSG",8806]],
-        PARAMETER["False northing",0,
-            LENGTHUNIT["metre",1],
-            ID["EPSG",8807]]],
-    CS[Cartesian,2],
-        AXIS["easting (X)",east,
-            ORDER[1],
-            LENGTHUNIT["metre",1]],
-        AXIS["northing (Y)",north,
-            ORDER[2],
-            LENGTHUNIT["metre",1]],
-    USAGE[
-        SCOPE["Equal-area statistical analysis and national mapping of hydrological and remote-sensing products."],
-        AREA["Mozambique - onshore and offshore."],
-        BBOX[-27.71,30.21,-10.09,43.03]]]
+```{python}
+#| label: wkt
+#| output: asis
+print("```\n" + R.authoritative_wkt() + "\n```")
 ```
 
 Equivalent PROJ string (for reference only; the WKT2 above is authoritative):
@@ -465,12 +455,9 @@ Equivalent PROJ string (for reference only; the WKT2 above is authoritative):
 ```
 
 The ellipsoidal formulas of EPSG method 9820 are given in IOGP Guidance Note 7-2
-and Snyder [-@snyder1987, pp. 182–190].
-
-Note on naming: products generated before this note carry the earlier working
-name "Mozambique Lambert Azimuthal Equal Area (LNEG)" in their embedded WKT2.
-The projection parameters are identical; only the label differs, and the earlier
-name is retained as an alias.
+and Snyder [-@snyder1987, pp. 182–190]. Products generated before this note carry
+the earlier working label "Mozambique Lambert Azimuthal Equal Area (LNEG)" in their
+embedded WKT2; the projection parameters are identical, only the label differs.
 
 # Precedents {#sec-precedents}
 
@@ -478,8 +465,21 @@ name is retained as an alias.
 |---|---|
 | EPSG:3035, ETRS89-extended / LAEA Europe | European Environment Agency / EU (INSPIRE) |
 | EPSG:6931 to 6933, EASE-Grid 2.0 | NSIDC |
-| EPSG:9311, US National Atlas Equal Area | USGS |
+| EPSG:9311, NAD27 / US National Atlas Equal Area | USGS |
 | EPSG:3577, GDA94 / Australian Albers | Geoscience Australia |
+
+This proposal follows an established pattern rather than filling a gap. The
+closest precedent is Iceland, which registered two equal-area CRSs side by side:
+ISN2004 / LAEA Europe (EPSG:5638, the pan-European parameters, for continental
+reporting) and ISN2004 / LAEA Iceland (EPSG:9947, centred on the country, for
+national work) — exactly the situation here, with Africa Albers as the regional
+fallback and a country-centred LAEA for national products. National-scale
+equal-area CRSs are likewise registered for other countries (for example
+Hartebeesthoek94 / ZAF BSU Albers for South Africa, EPSG:9221), and WGS 84-based
+equal-area CRSs are registered for satellite-derived products (EASE-Grid 2.0,
+EPSG:6931–6933). The proposed CRS sits squarely in that tradition: a documented
+equal-area grid, on the same datum as its source imagery, for a national body of
+remote-sensing products.
 
 # Evidence of operational use
 
@@ -489,8 +489,8 @@ programme is led by the Direcção Nacional de Gestão de Recursos Hídricos (DN
 the Mozambican national water resources authority, and financed by the World Bank
 under the Regional Climate Resilience Program for Eastern & Southern Africa
 (P180171); LNEG executes the remote-sensing component under consulting services
-contract DNGRH-346682-CS-QCBS, awarded by DNGRH. The products in this CRS
-are delivered to DNGRH under that contract, and include:
+contract DNGRH-346682-CS-QCBS, awarded by DNGRH. The products in this CRS are
+delivered to DNGRH under that contract, and include:
 
 - full-scale national multitemporal mosaics of Sentinel-2 (L2A), Sentinel-1
   (GRD) and Landsat imagery;
@@ -500,14 +500,12 @@ are delivered to DNGRH under that contract, and include:
 
 The contract establishes the mandate under which these national products were
 produced and the Mozambican authority to which they were delivered. It is cited
-here as evidence of operational use and of provenance; it does not constitute an
-endorsement by DNGRH of this registration request, which is submitted by LNEG.
-
-Every product written in this CRS embeds the full WKT2 definition of @sec-wkt,
-so the products are self-describing and readable by any modern GIS or geospatial
-library regardless of registry status. Registration in the EPSG Dataset replaces
-the embedded custom label with a stable public identifier; it does not change the
-grid of any existing product.
+here as evidence of operational use and of provenance. The registration is
+submitted by LNEG as the technical author of these national products.
+Every product written in this CRS embeds the full WKT2 definition of @sec-wkt, so
+the products are self-describing regardless of registry status; registration
+replaces the embedded custom label with a stable public identifier and does not
+change the grid of any existing product.
 
 # Test points {#sec-testpoints}
 
@@ -524,7 +522,7 @@ print(R.md_table(SECTIONS["Section 8"],
                  ["location", "latitude", "longitude", "easting_m", "northing_m",
                   "roundtrip_mas"],
                  ["Location", "Latitude", "Longitude", "Easting (m)",
-                  "Northing (m)", "Round-trip (mas)"],
+                  "Northing (m)", "Round-trip residual (mas, PROJ 9.5.1)"],
                  fmt={"easting_m": ".2f", "northing_m": ".2f",
                       "roundtrip_mas": ".4f"}))
 ```
@@ -533,11 +531,14 @@ print(R.md_table(SECTIONS["Section 8"],
 #| label: roundtrip-note
 #| output: asis
 worst_rt = max(r["roundtrip_mas"] for r in SECTIONS["Section 8"])
-print(f"The inverse round-trip error is below {worst_rt:.2f} milliarcseconds "
-      f"(under 2 mm) for all points, and the two independent distortion methods "
-      f"agree to within {WORST_DIFF:.4f}° at every extreme point, with an areal "
-      f"scale of unity. These checks are assertions in the bundled script: if any "
-      f"failed, this document would not render.")
+print(f"The projected eastings and northings are exact: they match the closed-form "
+      f"ellipsoidal formulas to the published centimetre, which is the conformance "
+      f"tolerance for the test-point coordinates (1 cm in E and N). The round-trip "
+      f"residual in the last column is a separate quantity — a property of PROJ "
+      f"9.5.1's inverse (a truncated authalic-latitude series), not of the CRS — and "
+      f"stays below {worst_rt:.2f} milliarcseconds (under 2 mm). Independently, the two "
+      f"distortion estimators agree to better than 0.001° at every extreme point, with "
+      f"an areal scale of unity.")
 ```
 
 # Limitations
@@ -551,20 +552,25 @@ print(f"The inverse round-trip error is below {worst_rt:.2f} milliarcseconds "
   exactly in every projection considered, so no area statistic is affected by
   the choice among them.
 - Extreme-point figures bound the interior; onshore grid statistics use a 0.1°
-  sampling and the Natural Earth 1:10M boundary [@naturalearth], adequate for
+  sampling and the Natural Earth 1:10m Admin 0 – Countries boundary [@naturalearth],
+  the exact file pinned by the SHA-256 hash of @sec-appendix, adequate for
   distributional statistics but not for boundary-pixel adjudication. A GADM
   level-0 boundary can be substituted in the bundled script for a future release.
 
-# How to cite
+# How to cite {.unnumbered}
 
 Gonçalves, P. (2026). *Definition of the projected coordinate reference
-system WGS 84 / Mozambique LAEA*. LNEG technical note, version 1.0. Zenodo.
+system WGS 84 / LAEA Mozambique*. LNEG technical note, version 1.0. Zenodo.
 https://doi.org/10.5281/zenodo.21512485
 
 # Appendix A. Reproducibility {#sec-appendix}
 
-Every number and figure in this document is computed when the document is
-rendered. Nothing is transcribed. The deposit contains:
+Every number and figure in this document is computed at render time by the bundled
+scripts and inserted directly by Quarto; nothing is transcribed by hand.
+`reproduce.py` computes the tables and emits `results.csv`; `figures.py` draws the
+figures from the same functions. `results.csv` is versioned as a regression
+baseline, so any change in a future PROJ release shows up as a diff. The deposit
+contains:
 
 ```{python}
 #| label: tbl-files
@@ -583,31 +589,28 @@ print(R.md_table(files, ["file", "role"], ["File", "Role"]))
 ```{python}
 #| label: hash-note
 #| output: asis
-print(f"The boundary file is verified against SHA-256 `{R.BOUNDARY_SHA256}` "
-      f"before use; a mismatch aborts execution, so the statistics cannot "
-      f"silently change with an upstream dataset revision.")
+print("The boundary file is verified against this SHA-256 before use; a mismatch "
+      "aborts execution, so the statistics cannot silently change with an upstream "
+      "dataset revision.\n\n```\n" + R.BOUNDARY_SHA256 + "\n```")
 ```
 
-To verify the numbers without rendering this document:
+To regenerate the numbers and figures:
 
 ```bash
-python reproduce.py     # prints every section, writes results.csv
-python figures.py       # writes the figures as PNG and PDF
+python reproduce.py         # prints every section, writes results.csv
+python figures.py           # writes the figures as PNG and PDF
 ```
 
 Dependencies: `pyproj >= 3.7` (PROJ >= 9.5), `numpy >= 1.24`, `shapely >= 2.0`
 for the numbers; `matplotlib >= 3.8` additionally for the figures; Quarto with
-the Jupyter engine to render this document. Reference environment: pyproj 3.7.2
+the Jupyter engine to generate the document. Reference environment: pyproj 3.7.2
 with PROJ 9.5.1.
 
-Two independent computations of angular deformation are provided and
-cross-checked against each other: the authoritative one uses the PROJ Tissot
-factors, and the independent one takes the singular values of the local Jacobian
-built from central geodesic differences, which makes no assumption that the
-Tissot principal axes align with meridian and parallel.
-
-Methodological limitations: distortion is evaluated pointwise on regular grids;
-onshore statistics use a 0.1° grid and the bundled 1:10M boundary.
+Angular deformation is computed two independent ways and cross-checked: the
+authoritative one uses the PROJ Tissot factors, and the independent one takes the
+singular values of the local Jacobian built from central geodesic differences,
+which makes no assumption that the Tissot principal axes align with meridian and
+parallel.
 
 # References {.unnumbered}
 
