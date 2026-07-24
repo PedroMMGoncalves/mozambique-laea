@@ -7,9 +7,3 @@ dependencies:
   - numpy>=1.24
   - shapely>=2.0
   - matplotlib>=3.8
-  # rendering the document only:
-  - quarto
-  - jupyter
-  - nbclient
-  - nbformat
-  - ipykernel

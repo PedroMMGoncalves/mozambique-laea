@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Numeric core for the WGS 84 / LAEA Mozambique defining note.
 
-Single source of truth for every quantitative claim in the note. Three clients
+Single source of truth for every quantitative claim in the note. Two clients
 consume these functions:
 
-    python reproduce.py     prints all sections and writes results.csv
+    python reproduce.py     prints the WKT2, all tables and test points, and
+                            writes results.csv
     figures.py              imports the distortion functions for the figures
-    report.qmd              calls the table functions at render time, so the
-                            document cannot drift from the computation
+
+The note itself is authored by hand; its tables and figures are taken from the
+output of these scripts, so the prose is the only thing written manually.
 
 The module is self-contained and offline. It reads the bundled national
 boundary by path and verifies its SHA-256 before use, so the reported numbers
@@ -70,7 +72,7 @@ CANDIDATES = {
 REGISTRABLE = ("LAEA (this CRS)", "Albers MZ -13/-24", "Bonne lat_1=-18.5",
                "Africa Albers 102022")
 
-# Display names used in the rendered tables
+# Display names used in the printed tables
 LABELS = {
     "LAEA (this CRS)": "**LAEA 18.5°S / 35.5°E (this CRS)**",
     "Albers MZ -13/-24": "Albers Equal Area, parallels 13°/24° S",
@@ -147,7 +149,7 @@ def authoritative_wkt() -> str:
     # Complete the WGS 84 ensemble membership to the current EPSG dataset (v11.022):
     # G2296 (datum 1383) was added in 2024. This local PROJ bundles an earlier EPSG
     # version, so the member is appended here; the ensemble list is reference-only
-    # (see the note in report.qmd) and not part of the frozen normative content.
+    # and not part of the frozen normative content.
     if "G2296" not in wkt:
         wkt = wkt.replace(
             'MEMBER["World Geodetic System 1984 (G2139)"],',
@@ -224,7 +226,7 @@ def onshore_mask(prepared, lons=None, lats=None):
 
 
 # =========================================================================== #
-# SECTION 3. Tables (pure data; consumed by report.qmd and by main)
+# SECTION 3. Tables (pure data; consumed by figures.py and by main)
 # =========================================================================== #
 def table1_extremes():
     """Table 1: omega at domain extreme points, every candidate projection."""
@@ -428,6 +430,9 @@ def verify(sections):
 def main() -> None:
     geom, prepared = load_boundary()
     print(f"boundary OK  sha256={BOUNDARY_SHA256[:12]}...  parts={len(geom.geoms)}")
+
+    print("\n[WKT2:2019 authoritative definition]  (copy into the note)")
+    print(authoritative_wkt())
 
     sections, n_onshore = all_sections(prepared)
 
