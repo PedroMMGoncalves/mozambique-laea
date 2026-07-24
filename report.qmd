@@ -210,7 +210,7 @@ midpoint 18.66° S), rounded to the nearest half degree: 35.5° E, 18.5° S.
 print(
     f"This rounding is justified, not merely aesthetic. A min-max search over the "
     f"onshore territory places the optimal origin at {OPT['optimal_lon']}° E, "
-    f"{abs(OPT['optimal_lat'])}° S, with a maximum $\\omega$ of {OPT['optimal_max']}°; "
+    f"{abs(OPT['optimal_lat'])}° S, with a maximum ω of {OPT['optimal_max']}°; "
     f"the adopted origin gives {OPT['adopted_max']}°, only {OPT['gap_percent']} percent "
     f"above the optimum. The half-degree rounding also improves on the exact onshore "
     f"midpoint (35.53° E, 18.66° S), which yields {OPT['midpoint_max']}°."
@@ -219,16 +219,12 @@ print(
 
 ## Distortion characteristics {#sec-distortion}
 
-On the sphere, a point at angular distance $\beta$ from the origin projects at
-radius $\rho = 2R\sin(\beta/2)$. The principal scale factors are reciprocal,
-$h = \cos(\beta/2)$ radially and $k = \sec(\beta/2)$ tangentially, so the areal
-scale $hk = 1$ holds exactly everywhere, and the maximum angular deformation
-$\omega$ follows
-
-$$\sin\frac{\omega}{2} = \frac{k-h}{k+h},$$ {#eq-omega}
-
-growing with the square of the distance from the origin and isotropically
-around it. The ellipsoidal form (EPSG method 9820) preserves these properties on
+On the sphere, a point at angular distance β from the origin projects at
+radius ρ = 2R sin(β/2). The principal scale factors are reciprocal,
+h = cos(β/2) radially and k = sec(β/2) tangentially, so the areal
+scale hk = 1 holds exactly everywhere, and the maximum angular deformation ω
+follows sin(ω/2) = (k − h) / (k + h), growing with the square of the distance
+from the origin and isotropically around it. The ellipsoidal form (EPSG method 9820) preserves these properties on
 the ellipsoid via the authalic latitude [@snyder1987; @iogp7-2]. Because
 distortion is radial, an azimuthal projection suits a territory whose extent is
 diagonal or north-south, where conic projections (optimal for east-west bands)
@@ -243,11 +239,11 @@ med = T2[LAEA_KEY]["median"]
 p95 = T2[LAEA_KEY]["p95"]
 print(
     f"Verified numerically on the WGS 84 ellipsoid (@sec-appendix): "
-    f"$\\omega$ reaches {n_tip:.2f}° at the northern onshore extreme "
+    f"ω reaches {n_tip:.2f}° at the northern onshore extreme "
     f"({DIST['N tip']} km from the origin) and {laea_max_extreme:.2f}° at the "
     f"farthest corner of the offshore bounding box ({DIST['SE corner']} km). Over the "
     f"onshore territory ({N_ONSHORE} samples on a 0.1° grid using a 1:10M "
-    f"boundary), the median $\\omega$ is {med:.2f}° and the 95th percentile "
+    f"boundary), the median ω is {med:.2f}° and the 95th percentile "
     f"{p95:.2f}°. The worst-case linear anisotropy in the whole domain is "
     f"1.0 percent: a 10 m pixel renders as approximately 10.05 m by 9.95 m with "
     f"exact area. @fig-field maps the deformation field."
