@@ -186,7 +186,6 @@ applies directly here.
 | Field | Value |
 |---|---|
 | CRS name (proposed) | WGS 84 / LAEA Mozambique |
-| Alias | Mozambique Lambert Azimuthal Equal Area |
 | Type | Projected CRS |
 | Base CRS | WGS 84 (EPSG:4326) |
 | Conversion name | Mozambique Lambert Azimuthal Equal Area |
@@ -344,7 +343,7 @@ suffers there.
 
 ```{python}
 #| label: fig-cdf
-#| fig-cap: "Empirical cumulative distribution of angular deformation over onshore Mozambique for the four registrable candidates (log scale). The centred LAEA is best across the whole range above 0.015° — over 98.5 percent of the territory."
+#| fig-cap: "Empirical cumulative distribution of angular deformation over onshore Mozambique for the four registrable candidates (log scale). The centred LAEA is best at every distortion threshold above 0.015°; below that the Bonne is marginally ahead, by at most 1.6 percentage points of territory."
 F.build("fig2_omega_cdf", GEOM, PREPARED)
 ```
 
@@ -358,9 +357,9 @@ F.build("fig3_country_fill", GEOM, PREPARED)
 Interpretation:
 
 - The two serious registrable competitors are the tuned national Albers and the
-  Bonne (EPSG method 9827); the LAEA is best across essentially the whole onshore
-  distribution — everywhere above 0.015°, i.e. over 98.5 percent of the territory
-  (@fig-cdf). The Albers loses because conics optimise east-west
+  Bonne (EPSG method 9827); the LAEA is best at every distortion threshold above
+  0.015° (@fig-cdf). Below that threshold the Bonne is marginally ahead, by at
+  most 1.6 percentage points of territory. The Albers loses because conics optimise east-west
   extents while Mozambique is elongated north-south; the Bonne, which is truly
   equal-area on the ellipsoid, loses because its shape distortion grows away from
   the central meridian and standard parallel.
