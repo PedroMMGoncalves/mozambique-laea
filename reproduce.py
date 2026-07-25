@@ -27,6 +27,11 @@ Two independent distortion computations are provided and cross-checked:
                   built from central geodesic differences, making no assumption
                   that the Tissot axes align with meridian and parallel
 
+The projected test points are checked against laea_closed_form, a direct
+implementation of the EPSG method 9820 formulas that does not call PROJ, so the
+published coordinates are verified against the normative formulas and not only
+against the library that produced them.
+
 Methodological limitations: distortion is evaluated pointwise on regular grids;
 onshore statistics use a 0.1 degree grid and the bundled 1:10M boundary,
 adequate for distributional statistics but not for boundary-pixel adjudication.
@@ -62,21 +67,38 @@ LAEA_PROJ = "+proj=laea +lat_0=-18.5 +lon_0=35.5 +x_0=0 +y_0=0 +datum=WGS84 +uni
 # where noted. PROJ's transverse cylindrical equal area (tcea) is a spherical-only
 # implementation, so it does NOT preserve area on the ellipsoid; it is therefore
 # excluded from the comparison and discussed only in prose (non-registrable too).
+#
+# GLANCE Africa is EPSG:10592, the registered continental equal-area CRS for
+# satellite raster products over Africa (LAEA, method 9820, on WGS 84, origin
+# 5N/20E). It is written as a PROJ string rather than CRS.from_epsg(10592)
+# because the code was added in EPSG v11 and PROJ installations carrying an
+# earlier database cannot resolve it; verify() asserts the two agree wherever
+# the registry entry IS available.
+GLANCE_AFRICA_PROJ = "+proj=laea +lat_0=5 +lon_0=20 +x_0=0 +y_0=0 +datum=WGS84 +units=m"
+
 CANDIDATES = {
     "LAEA (this CRS)": LAEA_PROJ,
     "Albers MZ -13/-24": "+proj=aea +lat_1=-13 +lat_2=-24 +lat_0=-18.5 +lon_0=35.5 +datum=WGS84 +units=m",
     "Bonne lat_1=-18.5": "+proj=bonne +lat_1=-18.5 +lon_0=35.5 +datum=WGS84 +units=m",
+    "GLANCE Africa 10592": GLANCE_AFRICA_PROJ,
     "Africa Albers 102022": "+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25 +datum=WGS84 +units=m",
     "CEA lat_ts=-18.5": "+proj=cea +lat_ts=-18.5 +lon_0=35.5 +datum=WGS84 +units=m",
 }
-REGISTRABLE = ("LAEA (this CRS)", "Albers MZ -13/-24", "Bonne lat_1=-18.5",
-               "Africa Albers 102022")
+
+# Candidates carried into the distributional comparison (Table 2, Figure 2): the
+# two that are competitive over Mozambique, plus the two continental equal-area
+# fallbacks a national product would otherwise be forced onto. The Lambert
+# Cylindrical EA is registrable (EPSG method 9835) but is dropped here on
+# performance, not on registrability.
+COMPARED = ("LAEA (this CRS)", "Albers MZ -13/-24", "Bonne lat_1=-18.5",
+            "GLANCE Africa 10592", "Africa Albers 102022")
 
 # Display names used in the printed tables
 LABELS = {
     "LAEA (this CRS)": "**LAEA 18.5°S / 35.5°E (this CRS)**",
     "Albers MZ -13/-24": "Albers Equal Area, parallels 13°/24° S",
     "Bonne lat_1=-18.5": "Bonne, standard parallel 18.5° S (EPSG method 9827)",
+    "GLANCE Africa 10592": "WGS 84 / GLANCE Africa (EPSG:10592, LAEA 5°N/20°E)",
     "Africa Albers 102022": "Africa Albers (ESRI:102022, 20°N/23°S)",
     "CEA lat_ts=-18.5": "Lambert Cylindrical EA, lat_ts 18.5°S",
 }
@@ -146,6 +168,11 @@ def authoritative_wkt() -> str:
     wkt = crs.to_wkt(version="WKT2_2019", pretty=True)
     wkt = wkt.replace('AXIS["(E)",east', 'AXIS["easting (E)",east')
     wkt = wkt.replace('AXIS["(N)",north', 'AXIS["northing (N)",north')
+    # The axis names are the normative EPSG spelling for CS 4400; a PROJ release
+    # that changed its output shape would turn the patches above into silent
+    # no-ops, so fail loudly instead of publishing a subtly wrong definition.
+    assert 'AXIS["easting (E)",east' in wkt, "easting axis name not patched"
+    assert 'AXIS["northing (N)",north' in wkt, "northing axis name not patched"
     # Complete the WGS 84 ensemble membership to the current EPSG dataset (v11.022):
     # G2296 (datum 1383) was added in 2024. This local PROJ bundles an earlier EPSG
     # version, so the member is appended here; the ensemble list is reference-only
@@ -155,10 +182,49 @@ def authoritative_wkt() -> str:
             'MEMBER["World Geodetic System 1984 (G2139)"],',
             'MEMBER["World Geodetic System 1984 (G2139)"],\n'
             '            MEMBER["World Geodetic System 1984 (G2296)"],')
+    assert wkt.count("MEMBER[") == 8, (
+        f"expected 8 WGS 84 ensemble members, found {wkt.count('MEMBER[')}")
     usage = (',\n    USAGE[\n        SCOPE["' + CRS_SCOPE + '"],\n'
              '        AREA["Mozambique - onshore and offshore."],\n'
              '        BBOX[-27.71,30.21,-10.09,43.03]]')
     return wkt.rstrip()[:-1] + usage + ']'
+
+
+# =========================================================================== #
+# SECTION 0b. Independent closed-form implementation of EPSG method 9820
+# =========================================================================== #
+def laea_closed_form(lat, lon, lat_0=-18.5, lon_0=35.5):
+    """Forward LAEA from the published formulas, with no PROJ involvement.
+
+    IOGP Guidance Note 7-2 (method 9820) / Snyder (1987, 187-190), oblique
+    ellipsoidal case, on the WGS 84 ellipsoid. This exists so the test points of
+    Section 8 are checked against the normative formulas rather than against the
+    library that produced them: the note claims the published easting and
+    northing match the closed form to the centimetre, and verify() enforces it.
+    """
+    a, rf = 6378137.0, 298.257223563
+    f = 1.0 / rf
+    e2 = f * (2 - f)
+    e = math.sqrt(e2)
+
+    def q(phi):
+        s = math.sin(phi)
+        return (1 - e2) * (s / (1 - e2 * s * s)
+                           - (1 / (2 * e)) * math.log((1 - e * s) / (1 + e * s)))
+
+    phi, lam = math.radians(lat), math.radians(lon)
+    phi0, lam0 = math.radians(lat_0), math.radians(lon_0)
+    q_p, q_0, q_v = q(math.pi / 2), q(phi0), q(phi)
+    beta, beta0 = math.asin(q_v / q_p), math.asin(q_0 / q_p)
+    r_q = a * math.sqrt(q_p / 2)
+    d = (a * (math.cos(phi0) / math.sqrt(1 - e2 * math.sin(phi0) ** 2))
+         / (r_q * math.cos(beta0)))
+    b = r_q * math.sqrt(2 / (1 + math.sin(beta0) * math.sin(beta)
+                             + math.cos(beta0) * math.cos(beta) * math.cos(lam - lam0)))
+    easting = b * d * math.cos(beta) * math.sin(lam - lam0)
+    northing = (b / d) * (math.cos(beta0) * math.sin(beta)
+                          - math.sin(beta0) * math.cos(beta) * math.cos(lam - lam0))
+    return easting, northing
 
 
 # =========================================================================== #
@@ -241,10 +307,10 @@ def table1_extremes():
 
 
 def table2_onshore(prepared):
-    """Table 2: onshore distribution of omega, registrable candidates."""
+    """Table 2: onshore distribution of omega, the compared candidates."""
     lon_flat, lat_flat, mask = onshore_mask(prepared)
     rows = []
-    for name in REGISTRABLE:
+    for name in COMPARED:
         w = omega_pyproj(CANDIDATES[name], lon_flat[mask], lat_flat[mask])
         w = w[np.isfinite(w)]
         rows.append({
@@ -319,10 +385,17 @@ def origin_optimality(prepared):
 
     Compares three origins by their maximum onshore angular deformation: the
     adopted (rounded) origin, the exact onshore midpoint (unrounded), and the
-    min-max optimal origin found by a coarse grid search. Demonstrates that
-    rounding to the half degree does not cost accuracy (it in fact improves on
-    the exact midpoint) and that the adopted origin is within a few percent of
-    the optimum, so the choice is justified, not merely aesthetic.
+    min-max optimal origin found by a grid search. Demonstrates that rounding to
+    the half degree does not cost accuracy (it in fact improves on the exact
+    midpoint) and that the adopted origin is within a few percent of the
+    optimum, so the choice is justified, not merely aesthetic.
+
+    The search box is deliberately wide and brackets the adopted origin on every
+    side (a narrow box could exclude a better origin and flatter the adopted
+    one). Its bounds are returned so the note can state them. Note that the
+    objective is flat near its minimum: the optimal VALUE is well determined,
+    the optimal LOCATION is not, and origins a few tenths of a degree apart
+    score the same to three decimal places.
     """
     lon_flat, lat_flat, mask = onshore_mask(prepared)
     lons, lats = lon_flat[mask], lat_flat[mask]
@@ -334,10 +407,17 @@ def origin_optimality(prepared):
 
     adopted = onshore_max(*ORIGIN)
     midpoint = onshore_max(35.53, -18.66)          # onshore midpoint (0.01 deg)
+
+    box = (33.0, 39.0, -21.0, -16.0)               # (W, E, S, N) of the search
     best_max, best_origin = 1e9, None
-    for o_lat in np.arange(-19.4, -18.0, 0.05):
-        for o_lon in np.arange(35.6, 37.4, 0.05):
-            m = onshore_max(o_lon, o_lat)
+    for o_lat in np.arange(box[2], box[3], 0.1):   # coarse pass
+        for o_lon in np.arange(box[0], box[1], 0.1):
+            m = onshore_max(round(o_lon, 2), round(o_lat, 2))
+            if m < best_max:
+                best_max, best_origin = m, (round(o_lon, 2), round(o_lat, 2))
+    for o_lat in np.arange(best_origin[1] - 0.12, best_origin[1] + 0.13, 0.02):
+        for o_lon in np.arange(best_origin[0] - 0.12, best_origin[0] + 0.13, 0.02):
+            m = onshore_max(round(o_lon, 2), round(o_lat, 2))
             if m < best_max:
                 best_max, best_origin = m, (round(o_lon, 2), round(o_lat, 2))
     return {
@@ -347,6 +427,7 @@ def origin_optimality(prepared):
         "optimal_lon": best_origin[0],
         "optimal_lat": best_origin[1],
         "gap_percent": round((adopted - best_max) / best_max * 100, 1),
+        "search_box": f"lon {box[0]}..{box[1]}, lat {box[2]}..{box[3]}",
     }
 
 
@@ -421,7 +502,35 @@ def verify(sections):
                for r in sections["CRS crosscheck"]), "Areal scale is not unity"
     assert all(r["roundtrip_mas"] < 1.0
                for r in sections["Section 8"]), "Round-trip error too large"
-    return worst
+
+    # Section 8 claims the published test points match the closed-form
+    # ellipsoidal formulas of EPSG method 9820 to the published centimetre.
+    worst_cm = 0.0
+    for row in sections["Section 8"]:
+        lon, lat = TEST_POINTS[row["location"]]
+        e_ref, n_ref = laea_closed_form(lat, lon)
+        worst_cm = max(worst_cm, abs(row["easting_m"] - e_ref),
+                       abs(row["northing_m"] - n_ref))
+    assert worst_cm < 0.01, (
+        f"Test points differ from the closed form by {worst_cm:.4f} m")
+
+    # The published WKT2 must parse back to the CRS it claims to describe.
+    wkt = authoritative_wkt()
+    assert CRS.from_wkt(wkt).equals(CRS.from_user_input(LAEA_PROJ)), (
+        "Published WKT2 is not equivalent to the reference PROJ definition")
+
+    # Where the local PROJ database is new enough to know EPSG:10592, confirm
+    # the PROJ string used for GLANCE Africa is the registered definition.
+    glance = "not in this PROJ database"
+    try:
+        registered = CRS.from_epsg(10592)
+    except Exception:
+        pass
+    else:
+        assert registered.equals(CRS.from_user_input(GLANCE_AFRICA_PROJ)), (
+            "GLANCE Africa PROJ string does not match registered EPSG:10592")
+        glance = "matches registered EPSG:10592"
+    return worst, worst_cm, glance
 
 
 # =========================================================================== #
@@ -458,12 +567,22 @@ def main() -> None:
               f"svd {row['omega_svd']:.3f}  k {row['parallel_scale']:.4f}  "
               f"h {row['meridional_scale']:.4f}  areal {row['areal_scale']:.5f}")
 
-    worst = verify(sections)
+    worst, worst_cm, glance = verify(sections)
     print(f"\n[cross-check] proposed CRS: max |pyproj - svd| = {worst:.4f} deg  PASS")
+    print(f"[cross-check] test points vs closed-form EPSG 9820: "
+          f"max {worst_cm * 100:.2f} cm  PASS")
+    print(f"[cross-check] published WKT2 round-trips to the same CRS  PASS")
+    print(f"[cross-check] GLANCE Africa: {glance}")
 
     print("\n[Section 2.2] geodesic distance from origin")
     for row in sections["Section 2.2"]:
         print(f"  origin -> {row['point']}: {row['distance_km']} km")
+
+    opt = sections["Origin optimality"][0]
+    print(f"\n[Section 2.1] origin optimality (search {opt['search_box']})")
+    print(f"  adopted {opt['adopted_max']:.3f}  exact midpoint {opt['midpoint_max']:.3f}"
+          f"  optimum {opt['optimal_max']:.3f} at "
+          f"({opt['optimal_lon']}, {opt['optimal_lat']})  gap {opt['gap_percent']}%")
 
     path, count = write_results_csv(sections)
     print(f"\nwrote {path.name}  ({count} rows)")

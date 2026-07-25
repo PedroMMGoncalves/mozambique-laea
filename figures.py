@@ -37,11 +37,11 @@ from shapely.ops import transform as shapely_transform
  
 from reproduce import (
     CANDIDATES,
+    COMPARED,
     EXTENT_1167,
     EXTREMES,
     LAEA_PROJ,
     ORIGIN,
-    REGISTRABLE,
     TEST_POINTS,
     get_proj,
     load_boundary,
@@ -160,17 +160,19 @@ def figure2(prepared):
     colours = {"LAEA (this CRS)": "#1a6390",
                "Albers MZ -13/-24": "#c0392b",
                "Bonne lat_1=-18.5": "#8e44ad",
+               "GLANCE Africa 10592": "#2e8b57",
                "Africa Albers 102022": "#7f8c8d"}
     labels = {"LAEA (this CRS)": "WGS 84 / LAEA Mozambique (this CRS)",
               "Albers MZ -13/-24": "Albers Equal Area 13°/24° S",
               "Bonne lat_1=-18.5": "Bonne, standard parallel 18.5° S",
+              "GLANCE Africa 10592": "WGS 84 / GLANCE Africa (EPSG:10592)",
               "Africa Albers 102022": "Africa Albers (ESRI:102022)"}
  
     fig, ax = plt.subplots(figsize=(7.0, 4.4))
     ax.axhline(50, color="0.55", linewidth=0.8, linestyle=":", zorder=1)
     ax.text(0.0055, 51.5, "half the country", fontsize=7, color="0.4")
  
-    for i, name in enumerate(REGISTRABLE):
+    for i, name in enumerate(COMPARED):
         w = omega_pyproj(CANDIDATES[name], lon_flat[mask], lat_flat[mask])
         w = np.sort(w[np.isfinite(w)])
         cdf = np.arange(1, w.size + 1) / w.size * 100

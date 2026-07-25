@@ -1,6 +1,6 @@
 # WGS 84 / LAEA Mozambique
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21512485.svg)](https://doi.org/10.5281/zenodo.21512485)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.21548961.svg)](https://doi.org/10.5281/zenodo.21548961)
 
 Reproduction package for a national equal-area projected coordinate reference
 system for Mozambique, submitted as a change request to the IOGP EPSG Geodetic
@@ -8,11 +8,16 @@ Parameter Dataset.
 
 The CRS is a Lambert Azimuthal Equal Area projection (EPSG method 9820) centred
 on 18.5&deg;S, 35.5&deg;E, the midpoint of the national territory. It preserves
-area exactly, removes the UTM 36S/37S zone seam, and keeps shape distortion
-below 0.37&deg; over the onshore territory.
+area exactly, removes the UTM 36S/37S zone seam, and holds shape distortion to
+at most 0.37&deg; over the onshore territory (median 0.09&deg;).
+
+It is compared against every equal-area alternative a national product could
+otherwise use, including the two registered continental options that cover
+Mozambique: `WGS 84 / GLANCE Africa` (EPSG:10592) and the ESRI Africa Albers
+definition, whose onshore median distortions are 3.23&deg; and 4.40&deg;.
 
 The defining technical note &mdash; the citable document &mdash; is deposited on
-Zenodo: <https://doi.org/10.5281/zenodo.21512485>. **This repository holds the
+Zenodo: <https://doi.org/10.5281/zenodo.21548961>. **This repository holds the
 code that computes every number, table and figure in that note.** The note
 itself is written separately; the scripts here supply its quantitative content.
 

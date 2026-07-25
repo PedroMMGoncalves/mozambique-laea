@@ -21,7 +21,7 @@ keywords:
   - equal-area projection
   - reproducible research
 license: CC-BY-4.0
-version: "1.0.0"
-date-released: "2026-07-23"
-doi: "10.5281/zenodo.21512485"
-repository-code: "https://github.com/LNEG/mozambique-laea"
+version: "1.1.0"
+date-released: "2026-07-25"
+doi: "10.5281/zenodo.21548961"
+repository-code: "https://github.com/PedroMMGoncalves/mozambique-laea"
